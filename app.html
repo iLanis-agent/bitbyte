@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BitByte - Download time calculator</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:#0f1c1f; color:#e4f2f2; line-height:1.5; }
+  .wrap { max-width:640px; margin:0 auto; padding:26px 18px 60px; }
+  a { color:#4fd6c8; } h1 { font-size:28px; } h1 span { color:#4fd6c8; } .sub { color:#93b0b2; margin:4px 0 18px; }
+  .card { background:#19292d; border-radius:14px; padding:16px; margin-bottom:14px; }
+  label { display:block; font-size:13px; color:#93b0b2; margin:10px 0 4px; }
+  input, select { width:100%; padding:11px; border-radius:9px; border:1px solid #2f4a4f; background:#0f1c1f; color:#e4f2f2; font-size:16px; }
+  .row { display:flex; gap:10px; } .row > div { flex:1; } .row > div.s { flex:0 0 110px; }
+  .seg { display:flex; gap:8px; } .seg button { flex:1; padding:10px; border-radius:9px; border:1px solid #2f4a4f; background:#0f1c1f; color:#93b0b2; font-size:14px; cursor:pointer; } .seg button.on { background:#4fd6c8; color:#0f1c1f; font-weight:700; border-color:#4fd6c8; }
+  .big { font-size:44px; font-weight:800; color:#4fd6c8; } .lbl { font-size:13px; color:#93b0b2; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; } .grid b { display:block; font-size:20px; }
+  .note { font-size:14px; color:#c8dcdc; margin-top:10px; } h2 { font-size:17px; margin-bottom:8px; } .small { font-size:13px; color:#93b0b2; }
+  .chk { display:flex; align-items:center; gap:8px; margin-top:12px; font-size:14px; } .chk input { width:auto; }
+  .warn { background:#3d2a20; border:1px solid #b9703f; color:#ffddc4; padding:12px; border-radius:10px; margin-top:12px; font-size:14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Bit<span>Byte</span></h1>
+  <div class="sub">Your internet is sold in megabits. Your files are in megabytes. How long will it really take?</div>
+  <div class="card">
+    <div class="seg" id="mode"><button data-v="time" class="on">How long?</button><button data-v="need">What speed do I need?</button></div>
+    <div class="row"><div><label for="size">File size</label><input id="size" type="number" min="0" step="any" value="90"></div><div class="s"><label for="su">Unit</label><select id="su"><option>KB</option><option>MB</option><option selected>GB</option><option>TB</option></select></div></div>
+    <label class="chk"><input type="checkbox" id="bin"> Size is shown by Windows (it counts 1 GB as 1,073,741,824 bytes)</label>
+    <div id="timeui"><div class="row"><div><label for="spd">Connection speed</label><input id="spd" type="number" min="0" step="any" value="100"></div><div class="s"><label for="spu">Unit</label><select id="spu"><option>Kbps</option><option selected>Mbps</option><option>Gbps</option></select></div></div></div>
+    <div id="needui" style="display:none"><label for="mins">Finish within (minutes)</label><input id="mins" type="number" min="0.1" step="any" value="60"></div>
+    <label for="oh">Protocol overhead (%)</label><input id="oh" type="number" min="0" max="50" step="1" value="5">
+  </div>
+  <div class="card" id="out"></div>
+  <div class="card"><h2>About this</h2><div class="small">Time = size in bits &divide; speed in bits per second. There are 8 bits in a byte, so 100 Mbps moves 12.5 MB per second at most, and 1 Gbps is 125 MB per second (<a href="https://www.omcalculator.com/bandwidth-calculator/">omcalculator</a>). A 50 MB file on 100 Mbps takes 4 seconds before overhead (<a href="https://webcaretakers.com/calculators/broadband/file-download-time-calculator/">webcaretakers</a>). Overhead from TCP/IP, TLS and retransmits is typically 3 to 8 percent; 5% is an assumption for an idle line. Shared Wi-Fi, slow servers and speed caps can make the real figure much worse. <a href="index.html">About</a></div></div>
+</div>
+<script src="engine.js"></script>
+<script>
+var $ = function (i) { return document.getElementById(i); }, mode = 'time';
+Array.prototype.forEach.call($('mode').querySelectorAll('button'), function (b) { b.onclick = function () { Array.prototype.forEach.call($('mode').querySelectorAll('button'), function (x) { x.className = ''; }); b.className = 'on'; mode = b.getAttribute('data-v'); $('timeui').style.display = mode === 'time' ? '' : 'none'; $('needui').style.display = mode === 'need' ? '' : 'none'; render(); }; });
+function fmtSpeed(b) { return b >= 1e9 ? (b / 1e9).toFixed(2) + ' Gbps' : (b / 1e6).toFixed(b >= 1e7 ? 0 : 1) + ' Mbps'; }
+function render() {
+  var size = parseFloat($('size').value), oh = (parseFloat($('oh').value) || 0) / 100;
+  if (!(size > 0)) { $('out').innerHTML = '<div class="lbl">Enter a file size.</div>'; return; }
+  var by = Bits.bytes(size, $('su').value, $('bin').checked), h;
+  if (mode === 'time') {
+    var sp = parseFloat($('spd').value); if (!(sp > 0)) { $('out').innerHTML = '<div class="lbl">Enter a connection speed.</div>'; return; }
+    var bp = Bits.bps(sp, $('spu').value), raw = Bits.seconds(by, bp, 0), real = Bits.seconds(by, bp, oh);
+    h = '<div class="lbl">Estimated download time</div><div class="big" id="time">' + Bits.human(real) + '</div><div class="grid"><div><span class="lbl">Best case, no overhead</span><b id="raw">' + Bits.human(raw) + '</b></div><div><span class="lbl">Top speed in file terms</span><b id="mbps">' + (Bits.mbpsToMBps(bp / 1e6)).toFixed(2) + ' MB/s</b></div></div>';
+    if (real > 86400) h += '<div class="warn">More than a day. Check the unit on the file size and the speed.</div>';
+  } else {
+    var mins = parseFloat($('mins').value); if (!(mins > 0)) { $('out').innerHTML = '<div class="lbl">Enter minutes.</div>'; return; }
+    var need = Bits.neededBps(by, mins * 60, oh);
+    h = '<div class="lbl">You need at least</div><div class="big" id="need">' + fmtSpeed(need) + '</div><div class="grid"><div><span class="lbl">Same as</span><b>' + (need / 8e6).toFixed(1) + ' MB/s</b></div><div><span class="lbl">File size in bytes</span><b>' + by.toExponential(2) + '</b></div></div>';
+  }
+  $('out').innerHTML = h + '<div class="note">Assumes the connection runs flat out the whole time.</div>';
+}
+['size', 'su', 'bin', 'spd', 'spu', 'mins', 'oh'].forEach(function (i) { $(i).oninput = render; $(i).onchange = render; });
+render();
+</script>
+</body>
+</html>
