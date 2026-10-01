@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BitByte - Download time calculator</title>
+<meta name="description" content="How long will a download take, or what speed do you need? Bits versus bytes, Windows sizes and protocol overhead handled. Runs in your browser.">
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:#0f1c1f; color:#e4f2f2; line-height:1.6; }
+  .wrap { max-width:680px; margin:0 auto; padding:48px 20px 60px; }
+  .logo { font-size:46px; font-weight:800; } .logo span { color:#4fd6c8; }
+  .tag { font-size:19px; margin-top:10px; color:#c8dcdc; }
+  .cta { display:inline-block; margin-top:26px; background:#4fd6c8; color:#0f1c1f; font-weight:700; padding:14px 30px; border-radius:12px; text-decoration:none; }
+  h2 { font-size:21px; margin:40px 0 10px; } li { color:#a2bcbe; margin-bottom:8px; } ul { margin-left:20px; }
+  .demo { margin-top:26px; background:#19292d; border-radius:14px; padding:18px; display:flex; gap:18px; flex-wrap:wrap; } .demo div { flex:1; min-width:140px; } .demo b { display:block; font-size:30px; color:#4fd6c8; }
+  footer { margin-top:50px; font-size:13px; color:#728e90; } a { color:#4fd6c8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">Bit<span>Byte</span></div>
+  <div class="tag">100 Mbps does not download a 100 MB file in one second. It takes 8. See what a game install or a backup will really take.</div>
+  <a class="cta" href="app.html">Work it out &rarr;</a>
+  <div class="demo"><div><b>12.5 MB/s</b>top speed of 100 Mbps</div><div><b>2 h</b>90 GB at 100 Mbps, best case</div><div><b>125 MB/s</b>top speed of 1 Gbps</div></div>
+  <h2>What you get</h2>
+  <ul><li>Time for any file size and connection speed</li><li>Or the speed you need to finish in a set time</li><li>Windows file sizes (binary) handled</li><li>Protocol overhead you can change</li></ul>
+  <footer>Conversions checked against <a href="https://www.omcalculator.com/bandwidth-calculator/">omcalculator</a> and <a href="https://webcaretakers.com/calculators/broadband/file-download-time-calculator/">webcaretakers</a>. Overhead of 5% is an assumption.<br>App Factory project. <a href="https://github.com/iLanis-agent/bitbyte">Code</a></footer>
+</div>
+</body>
+</html>
